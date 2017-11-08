@@ -18,7 +18,7 @@ sleep_maximum=4
 #IO_ports=[14,15,18,23,24,25,8,7,11,9,10,22,27,17,4,3,2]
 # MAPPING PHISICAL PORTS TO LEDS
 tower_top=14
-front_=15
+front_light=15
 side_red=[9,11,10]
 side_green=[23,25,24]
 bi_led_red=17
@@ -33,6 +33,8 @@ GPIO.setup(bi_led_red,GPIO.OUT)
 GPIO.output(bi_led_red,True)
 GPIO.setup(bi_led_green,GPIO.OUT)
 GPIO.output(bi_led_green,True)
+GPIO.setup(front_light,GPIO.OUT)
+GPIO.output(front_light,True)
 for i in range(len(side_red)):
   GPIO.setup(side_red[i],GPIO.OUT)
   GPIO.output(side_red[i],True)
@@ -43,6 +45,7 @@ time.sleep(sleep_long)
 GPIO.output(tower_top,False)
 GPIO.output(bi_led_red,False)
 GPIO.output(bi_led_green,False)
+GPIO.output(front_light,False)
 for i in range(len(side_red)):
   GPIO.output(side_red[i],False)
 for i in range(len(side_green)):
@@ -123,7 +126,7 @@ def sides_multiple():
 
 
 def bicolor():
- while  keep_executing==True:
+ while keep_executing==True:
   GPIO.output(bi_led_green,False)
   GPIO.output(bi_led_red,True)
   time.sleep(sleep_long)
@@ -133,11 +136,36 @@ def bicolor():
   pass
  return
 
+def frontal_semi_broken():
+ sleep_factor=4
+ while keep_executing==True:
+  GPIO.output(front_light,True)
+  for i in range(sleep_factor):
+   time.sleep(sleep_long)
+   ## LIGHT SOMETIMES FLICKERS AS ITS SEMI BROKEN ##
+   glitch_factor=prob_rnd(0, 5, 2)
+   for k in range(glitch_factor):
+    GPIO.output(front_light,False)
+    #for y in range(1,randint(2, 3)):
+    y=randint(1, 2)
+    time.sleep(y*sleep_micro)
+    GPIO.output(front_light,True)
+    #for y in range(1,randint(2, 3)):
+    time.sleep(y*sleep_micro)
+
+  GPIO.output(front_light,False)
+  time.sleep(sleep_long*sleep_factor)
+
+  pass
+ return
+
 
 ## ASYNC EXECUTE ##
 t_sides = threading.Thread(target=sides_multiple)
 t_tower = threading.Thread(target=tower)
 t_bicolor = threading.Thread(target=bicolor)
+t_front = threading.Thread(target=frontal_semi_broken)
+t_front.start()
 t_bicolor.start()
 time.sleep(sleep_longer)
 t_sides.start()
