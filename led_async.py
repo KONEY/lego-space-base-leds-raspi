@@ -108,7 +108,7 @@ def sides_multiple():
   GPIO.output(side_red[len(side_red)-1],True)
   time.sleep(sleep_micro)
   GPIO.output(side_green[len(side_green)-1],False)
-  time.sleep(sleep_longer)
+  time.sleep(sleep_long)
 
   actual_side=side_red
   for i in range(len(actual_side)-1):
@@ -120,7 +120,7 @@ def sides_multiple():
   GPIO.output(side_green[len(side_green)-1],True)
   time.sleep(sleep_micro)
   GPIO.output(side_red[len(side_red)-1],False)
-  time.sleep(sleep_longer)
+  time.sleep(sleep_long)
   pass
  return
 
@@ -155,16 +155,48 @@ def frontal_semi_broken():
 
   GPIO.output(front_light,False)
   time.sleep(sleep_long*sleep_factor)
-
   pass
  return
 
+def frontal_pwm():
+ sleep_factor=4
+ pwm = GPIO.PWM(front_light, 40)
+ while keep_executing==True:
+  pwm.start(50)
+  pwm.ChangeDutyCycle(randint(1, 70))
+  pwm.ChangeFrequency(randint(1, 70))
+  time.sleep(randint(1,sleep_factor))
+  pwm.stop()
+  time.sleep(randint(1,sleep_factor))
+  pass
+ return
+
+def frontal_pwm_dim():
+ sleep_factor=4
+ dim_max=100
+ dim_min=2
+ pwm = GPIO.PWM(front_light, 100)
+ pwm.start(dim_min)
+ while keep_executing==True:
+  #pwm.ChangeFrequency(100)
+  for i in range(dim_min,dim_max,2):
+   pwm.ChangeDutyCycle(i)
+   time.sleep(sleep_micro)
+  #pwm.ChangeFrequency(randint(5, 30))
+  time.sleep(sleep_medium)
+  for i in range(dim_max,dim_min,-1):
+   pwm.ChangeDutyCycle(i)
+   time.sleep(sleep_micro)
+  time.sleep(sleep_medium)
+  pass
+ pwm.stop()
+ return
 
 ## ASYNC EXECUTE ##
 t_sides = threading.Thread(target=sides_multiple)
 t_tower = threading.Thread(target=tower)
 t_bicolor = threading.Thread(target=bicolor)
-t_front = threading.Thread(target=frontal_semi_broken)
+t_front = threading.Thread(target=frontal_pwm_dim)
 t_front.start()
 t_bicolor.start()
 time.sleep(sleep_longer)
